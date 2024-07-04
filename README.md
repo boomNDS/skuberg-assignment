@@ -21,9 +21,8 @@ erDiagram
     User ||--o{ Transaction : initiates
     User ||--o{ Order : places
     User ||--o{ MarketListing : creates
-    Wallet ||--o{ Transaction : involves
     MarketListing ||--o{ Order : receives
-    Order ||--o{ Transaction : resultsIn
+    Order ||--o{ Transaction : has
 
     User {
         int id PK
@@ -58,6 +57,7 @@ erDiagram
         int id PK
         int fromUserId FK
         int toUserId FK
+        int orderId FK
         string currency
         string type "buy/sell/transfer/withdraw"
         float amount

@@ -4,6 +4,11 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { ExchangeRatesModule } from './exchange-rates/exchange-rates.module';
+import { MarketListingsModule } from './market-listings/market-listings.module';
+import { OrdersModule } from './orders/orders.module';
+import { WalletsModule } from './wallets/wallets.module';
+import { TransactionsModule } from './transactions/transactions.module';
 
 @Module({
   imports: [
@@ -19,6 +24,11 @@ import { ConfigModule } from '@nestjs/config';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),
+    ExchangeRatesModule,
+    MarketListingsModule,
+    OrdersModule,
+    WalletsModule,
+    TransactionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
