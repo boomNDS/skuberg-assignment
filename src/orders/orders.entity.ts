@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { OrderStatus, OrderType } from './orders.enum';
 import { User } from '../users/user.entity';
@@ -45,11 +46,13 @@ export class Order {
   updatedAt: Date;
 
   @ManyToOne(() => User, (user) => user.orders)
+  @JoinColumn({ name: 'userId' })
   user: User;
 
   @OneToOne(() => Transaction, (transaction) => transaction.order)
   transaction: Transaction;
 
   @ManyToOne(() => MarketListing, (marketListing) => marketListing.orders)
+  @JoinColumn({ name: 'marketListingId' })
   marketListing: MarketListing;
 }

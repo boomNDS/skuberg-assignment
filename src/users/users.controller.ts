@@ -6,7 +6,6 @@ import {
   Put,
   Param,
   Delete,
-  NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
@@ -24,12 +23,7 @@ export class UsersController {
   //get user by id
   @Get(':id')
   async findOne(@Param('id') id: number): Promise<User> {
-    const user = await this.usersService.findOne(id);
-    if (!user) {
-      throw new NotFoundException('User does not exist!');
-    } else {
-      return user;
-    }
+    return this.usersService.findOne(id);
   }
 
   //create user
@@ -46,12 +40,7 @@ export class UsersController {
 
   //delete user
   @Delete(':id')
-  async delete(@Param('id') id: number): Promise<any> {
-    //handle error if user does not exist
-    const user = await this.usersService.findOne(id);
-    if (!user) {
-      throw new NotFoundException('User does not exist!');
-    }
+  async delete(@Param('id') id: number): Promise<void> {
     return this.usersService.delete(id);
   }
 }
