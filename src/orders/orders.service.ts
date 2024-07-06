@@ -2,12 +2,16 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './orders.entity';
 import { Repository } from 'typeorm';
+import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
+import { MarketListingsService } from '../market-listings/market-listings.service';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectRepository(Order)
     private orderRepo: Repository<Order>,
+    private exchangeRatesService: ExchangeRatesService,
+    private marketListingService: MarketListingsService,
   ) {}
 
   async getOrders(): Promise<[Order[], number]> {
@@ -22,6 +26,17 @@ export class OrdersService {
     return order;
   }
   async createOrder(order: Partial<Order>): Promise<Order> {
+    const advertiser = await this.marketListingService.getAdvertiserInfo(
+      order.marketListingId,
+    );
+    const currency = await this.exchangeRatesService.getCurrency(
+      advertiser.currency,
+    );
+    if (!currency) {
+      throw new NotFoundException(
+        `Currency does not exist!, Can't create your order.`,
+      );
+    }
     return this.orderRepo.save(order);
   }
 

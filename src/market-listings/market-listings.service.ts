@@ -11,6 +11,7 @@ export class MarketListingsService {
   constructor(
     @InjectRepository(MarketListing)
     private marketListingRepo: Repository<MarketListing>,
+    @InjectRepository(Order)
     private orderRepo: Repository<Order>,
   ) {}
 
