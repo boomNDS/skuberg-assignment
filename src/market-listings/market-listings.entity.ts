@@ -8,7 +8,6 @@ import {
   OneToMany,
   JoinColumn,
 } from 'typeorm';
-import { MarketPaymentMethod } from './market-listing.enum';
 import { User } from '../users/user.entity';
 import { Order } from '../orders/orders.entity';
 import { PaymentType } from '../common/enums/common.enum';
@@ -23,9 +22,6 @@ export class MarketListing {
 
   @Column({ enum: PaymentType })
   type: PaymentType;
-
-  @Column({ enum: MarketPaymentMethod })
-  paymentMethod: MarketPaymentMethod;
 
   @Column({ type: 'float8' })
   amount: number;
