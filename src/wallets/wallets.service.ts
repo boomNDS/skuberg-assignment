@@ -5,6 +5,9 @@ import { Repository } from 'typeorm';
 import { IWallet, IWalletStatusRes } from './wallets.interface';
 import { UsersService } from '../users/users.service';
 import { WalletAction, WalletType } from './wallets.enum';
+import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
+import { Order } from '../orders/orders.entity';
+import { ExchangeRate } from '../exchange-rates/exchange-rates.entity';
 
 @Injectable()
 export class WalletsService {
@@ -12,6 +15,7 @@ export class WalletsService {
     @InjectRepository(Wallet)
     private walletRepo: Repository<Wallet>,
     private usersService: UsersService,
+    private exchangeRatesService: ExchangeRatesService,
   ) {}
 
   async getMyWallet(
@@ -126,5 +130,41 @@ export class WalletsService {
 
     // deposit into toUser's wallet
     await this.deposit({ currency, amount, userId: toUserId, type });
+  }
+
+  async getBalanceInUSD(
+    currency: Partial<ExchangeRate>,
+    order: Partial<Order>,
+  ) {
+    // Get the exchange rate for THB
+    const fiatTHBRate = await this.exchangeRatesService.getCurrency('THB');
+    // Calculate the sell price in USD
+    const sellPriceInUsd = order.amount * (currency.price || 0);
+    console.log(`Need ${sellPriceInUsd} $ to buy`);
+    // Get the user's wallet details
+    const [yourWallet] = await this.getMyWallet(
+      order.userId,
+      WalletType.FIAT,
+      order.priceCurrency,
+    );
+    // Filter and calculate balances
+    const thbWallets = yourWallet.filter((w) => w.currency === 'THB');
+    const usdWallets = yourWallet.filter((w) => w.currency === 'USD');
+    const totalTHBBalance = thbWallets.reduce(
+      (total, w) => total + w.balance,
+      0,
+    );
+    const totalUSDBalance = usdWallets.reduce(
+      (total, w) => total + w.balance,
+      0,
+    );
+    const convertTHBToUSD = totalTHBBalance * fiatTHBRate.price;
+    console.log('Converted THB to USD:', convertTHBToUSD);
+    console.log('Total USD balance:', totalUSDBalance);
+    return {
+      convertTHBToUSD: convertTHBToUSD,
+      totalUSDBalance,
+      sellPriceInUsd,
+    };
   }
 }

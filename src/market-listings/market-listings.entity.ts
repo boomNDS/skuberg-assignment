@@ -30,9 +30,6 @@ export class MarketListing {
   @Column({ type: 'float8' })
   amount: number;
 
-  @Column({ nullable: true })
-  price?: number;
-
   @Column()
   userId: number;
 

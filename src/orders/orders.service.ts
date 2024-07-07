@@ -8,6 +8,7 @@ import { MarketListing } from '../market-listings/market-listings.entity';
 import { WalletsService } from '../wallets/wallets.service';
 import { WalletType } from '../wallets/wallets.enum';
 import { PaymentType } from '../common/enums/common.enum';
+// import { OrderStatus } from './orders.enum';
 
 @Injectable()
 export class OrdersService {
@@ -41,7 +42,6 @@ export class OrdersService {
       advertiser.currency,
     );
     const totalBalance = yourWallet.reduce((total, w) => total + w?.balance, 0);
-    console.log('totalBalance :', totalBalance);
     if (totalBalance - order.amount < 0) {
       throw new NotFoundException(
         `Not enough Balance! Please deposit ${advertiser.currency} before making an order.`,
@@ -61,25 +61,23 @@ export class OrdersService {
       throw new NotFoundException(`Your buy more than amount limit.`);
     }
     const currency = await this.exchangeRatesService.getCurrency(
-      order.priceCurrency,
+      advertiser.currency,
     );
-
-    const [yourWallet] = await this.walletsService.getMyWallet(
-      order.userId,
-      WalletType.FIAT,
-      order.priceCurrency,
-    );
-    const totalBalance = yourWallet.reduce((total, w) => total + w?.balance, 0);
+    const { totalUSDBalance, convertTHBToUSD, sellPriceInUsd } =
+      await this.walletsService.getBalanceInUSD(currency, order);
 
     if (!currency) {
       throw new NotFoundException(
         "Currency does not exist! Can't create your order.",
       );
-    } else if (!yourWallet.length) {
+    } else if (totalUSDBalance === undefined || convertTHBToUSD === undefined) {
       throw new NotFoundException(
         'Please deposit fiat to your wallet before making an order.',
       );
-    } else if (totalBalance - order.price < 0) {
+    } else if (
+      totalUSDBalance - sellPriceInUsd < 0 ||
+      convertTHBToUSD - sellPriceInUsd < 0
+    ) {
       throw new NotFoundException(
         'Not enough funds! Please deposit fiat to your wallet before making an order.',
       );
@@ -108,7 +106,6 @@ export class OrdersService {
     } else {
       await this.validateBuyOrder(order, advertiser);
     }
-
     return this.orderRepo.save(order);
   }
 

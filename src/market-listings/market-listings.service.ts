@@ -79,53 +79,102 @@ export class MarketListingsService {
       status === OrderStatus.CONFIRMED &&
       advertiser.type === PaymentType.BUY
     ) {
-      const currency = await this.exchangeRatesService.getCurrency(
-        advertiser.currency,
-      );
-      const sellAmountInUsd = order.amount * (currency?.price || 0);
-
-      const [yourWallet] = await this.walletsService.getMyWallet(
-        advertiser.userId,
-        WalletType.FIAT,
-        'USD',
-      );
-      const totalBalance = yourWallet.reduce(
-        (total, w) => total + (w?.balance || 0),
-        0,
-      );
-      console.log('yourWallet :', yourWallet);
-
-      if (totalBalance < sellAmountInUsd) {
-        throw new NotFoundException(
-          `Not enough balance! Please deposit USD before confirming an order.`,
-        );
-      }
-      // transfer
-      await this.walletsService.transferFunds(advertiser.userId, order.userId, {
-        currency: 'USD',
-        amount: sellAmountInUsd,
-        type: WalletType.FIAT,
-      });
-
-      await this.walletsService.transferFunds(order.userId, advertiser.userId, {
-        currency: 'BNB',
-        amount: order.amount,
-        type: WalletType.CRYPTO,
-      });
-
-      await this.transactionsService.createTransaction({
-        fromUserId: order.userId, //  user sell  coin
-        toUserId: advertiser.userId, //  advertiser buy  coin
-        currency: advertiser.currency,
-        type: TransactionType.BUY,
-        amount: order.amount,
-        price: sellAmountInUsd,
-        fee: 0,
-        total: sellAmountInUsd,
-        orderId: order.id,
-      });
+      await this.handleBuying(order, advertiser);
+    } else if (
+      status === OrderStatus.CONFIRMED &&
+      advertiser.type === PaymentType.SELL
+    ) {
+      await this.handleSelling(order, advertiser);
     }
 
+    return;
+
     await this.orderRepo.save({ ...order, status });
+  }
+
+  async handleBuying(
+    order: Partial<Order>,
+    advertiser: Partial<MarketListing>,
+  ) {
+    const currency = await this.exchangeRatesService.getCurrency(
+      advertiser.currency,
+    );
+    const sellAmountInUsd = order.amount * (currency?.price || 0);
+
+    const [yourWallet] = await this.walletsService.getMyWallet(
+      advertiser.userId,
+      WalletType.FIAT,
+      'USD',
+    );
+    const totalBalance = yourWallet.reduce(
+      (total, w) => total + (w?.balance || 0),
+      0,
+    );
+
+    if (totalBalance < sellAmountInUsd) {
+      throw new NotFoundException(
+        `Not enough balance! Please deposit USD before confirming an order.`,
+      );
+    }
+    // transfer
+    await this.walletsService.transferFunds(advertiser.userId, order.userId, {
+      currency: 'USD',
+      amount: sellAmountInUsd,
+      type: WalletType.FIAT,
+    });
+
+    await this.walletsService.transferFunds(order.userId, advertiser.userId, {
+      currency: advertiser.currency,
+      amount: order.amount,
+      type: WalletType.CRYPTO,
+    });
+
+    await this.transactionsService.createTransaction({
+      fromUserId: order.userId, //  user sell  coin
+      toUserId: advertiser.userId, //  advertiser buy  coin
+      currency: advertiser.currency,
+      type: TransactionType.BUY,
+      amount: order.amount,
+      price: sellAmountInUsd,
+      fee: 0,
+      total: sellAmountInUsd,
+      orderId: order.id,
+    });
+  }
+
+  async handleSelling(
+    order: Partial<Order>,
+    advertiser: Partial<MarketListing>,
+  ) {
+    const currency = await this.exchangeRatesService.getCurrency(
+      advertiser.currency,
+    );
+    const { totalUSDBalance, convertTHBToUSD, sellPriceInUsd } =
+      await this.walletsService.getBalanceInUSD(currency, order);
+    console.log({ totalUSDBalance, convertTHBToUSD, sellPriceInUsd });
+    // transfer
+    await this.walletsService.transferFunds(order.userId, advertiser.userId, {
+      currency: totalUSDBalance - sellPriceInUsd >= 0 ? 'USD' : 'THN',
+      amount: sellPriceInUsd,
+      type: WalletType.FIAT,
+    });
+
+    await this.walletsService.transferFunds(advertiser.userId, order.userId, {
+      currency: advertiser.currency,
+      amount: order.amount,
+      type: WalletType.CRYPTO,
+    });
+
+    await this.transactionsService.createTransaction({
+      fromUserId: advertiser.userId, //  user sell  coin
+      toUserId: order.userId,
+      currency: advertiser.currency,
+      type: TransactionType.SELL,
+      amount: order.amount,
+      price: sellPriceInUsd,
+      fee: 0,
+      total: sellPriceInUsd,
+      orderId: order.id,
+    });
   }
 }
