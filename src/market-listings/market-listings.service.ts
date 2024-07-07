@@ -75,19 +75,13 @@ export class MarketListingsService {
       throw new NotFoundException('Order does not exist!');
     }
 
-    if (
-      status === OrderStatus.CONFIRMED &&
-      advertiser.type === PaymentType.BUY
-    ) {
-      await this.handleBuying(order, advertiser);
-    } else if (
-      status === OrderStatus.CONFIRMED &&
-      advertiser.type === PaymentType.SELL
-    ) {
-      await this.handleSelling(order, advertiser);
+    if (status === OrderStatus.CONFIRMED) {
+      if (advertiser.type === PaymentType.BUY) {
+        await this.handleBuying(order, advertiser);
+      } else if (advertiser.type === PaymentType.SELL) {
+        await this.handleSelling(order, advertiser);
+      }
     }
-
-    return;
 
     await this.orderRepo.save({ ...order, status });
   }
@@ -113,10 +107,10 @@ export class MarketListingsService {
 
     if (totalBalance < sellAmountInUsd) {
       throw new NotFoundException(
-        `Not enough balance! Please deposit USD before confirming an order.`,
+        'Not enough balance! Please deposit USD before confirming an order.',
       );
     }
-    // transfer
+
     await this.walletsService.transferFunds(advertiser.userId, order.userId, {
       currency: 'USD',
       amount: sellAmountInUsd,
@@ -130,8 +124,8 @@ export class MarketListingsService {
     });
 
     await this.transactionsService.createTransaction({
-      fromUserId: order.userId, //  user sell  coin
-      toUserId: advertiser.userId, //  advertiser buy  coin
+      fromUserId: order.userId,
+      toUserId: advertiser.userId,
       currency: advertiser.currency,
       type: TransactionType.BUY,
       amount: order.amount,
@@ -151,10 +145,11 @@ export class MarketListingsService {
     );
     const { totalUSDBalance, convertTHBToUSD, sellPriceInUsd } =
       await this.walletsService.getBalanceInUSD(currency, order);
+
     console.log({ totalUSDBalance, convertTHBToUSD, sellPriceInUsd });
-    // transfer
+
     await this.walletsService.transferFunds(order.userId, advertiser.userId, {
-      currency: totalUSDBalance - sellPriceInUsd >= 0 ? 'USD' : 'THN',
+      currency: totalUSDBalance - sellPriceInUsd >= 0 ? 'USD' : 'THB',
       amount: sellPriceInUsd,
       type: WalletType.FIAT,
     });
@@ -166,7 +161,7 @@ export class MarketListingsService {
     });
 
     await this.transactionsService.createTransaction({
-      fromUserId: advertiser.userId, //  user sell  coin
+      fromUserId: advertiser.userId,
       toUserId: order.userId,
       currency: advertiser.currency,
       type: TransactionType.SELL,
