@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotAcceptableException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './orders.entity';
 import { Repository } from 'typeorm';
@@ -43,11 +47,11 @@ export class OrdersService {
     );
     const totalBalance = yourWallet.reduce((total, w) => total + w?.balance, 0);
     if (totalBalance - order.amount < 0) {
-      throw new NotFoundException(
+      throw new NotAcceptableException(
         `Not enough Balance! Please deposit ${advertiser.currency} before making an order.`,
       );
     } else if (order.amount > advertiser.amount) {
-      throw new NotFoundException(
+      throw new NotAcceptableException(
         `You are trying to sell more than the advertiser can buy.`,
       );
     }
@@ -58,7 +62,7 @@ export class OrdersService {
     advertiser: Partial<MarketListing>,
   ) {
     if (order.amount > advertiser.amount) {
-      throw new NotFoundException(`Your buy more than amount limit.`);
+      throw new NotAcceptableException(`Your buy more than amount limit.`);
     }
     const currency = await this.exchangeRatesService.getCurrency(
       advertiser.currency,
@@ -71,14 +75,14 @@ export class OrdersService {
         "Currency does not exist! Can't create your order.",
       );
     } else if (totalUSDBalance === undefined || convertTHBToUSD === undefined) {
-      throw new NotFoundException(
+      throw new NotAcceptableException(
         'Please deposit fiat to your wallet before making an order.',
       );
     } else if (
       totalUSDBalance - sellPriceInUsd < 0 ||
       convertTHBToUSD - sellPriceInUsd < 0
     ) {
-      throw new NotFoundException(
+      throw new NotAcceptableException(
         'Not enough funds! Please deposit fiat to your wallet before making an order.',
       );
     }
@@ -86,9 +90,9 @@ export class OrdersService {
 
   validateOrder(order: Partial<Order>, advertiser: Partial<MarketListing>) {
     if (order.userId === advertiser?.userId) {
-      throw new NotFoundException(`Your can't order your advertiser`);
+      throw new NotAcceptableException(`Your can't order your advertiser`);
     } else if (order.type === advertiser?.type) {
-      throw new NotFoundException(
+      throw new NotAcceptableException(
         `Your can't create this order because advertiser want to ${advertiser.type}`,
       );
     }

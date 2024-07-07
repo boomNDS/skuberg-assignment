@@ -20,8 +20,8 @@ export class Transaction {
   @Column()
   fromUserId: number;
 
-  @Column()
-  toUserId: number;
+  @Column({ nullable: true })
+  toUserId?: number;
 
   @Column()
   currency: string;
@@ -32,21 +32,21 @@ export class Transaction {
   @Column({ type: 'float8' })
   amount: number;
 
-  @Column({ type: 'float8' })
-  price: number;
+  @Column({ type: 'float8', nullable: true })
+  price?: number;
 
   @Column({ type: 'float8', nullable: true })
-  fee: number;
+  fee?: number;
 
   @Column({ type: 'float8', nullable: true })
-  total: number;
+  total?: number;
 
-  @Column()
-  orderId: number;
+  @Column({ nullable: true })
+  orderId?: number;
 
   // only for withdrawals
   @Column({ nullable: true })
-  toAddress?: number;
+  toAddress?: string;
 
   @CreateDateColumn()
   createdAt: Date;

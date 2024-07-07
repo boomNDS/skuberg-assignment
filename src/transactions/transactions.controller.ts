@@ -41,4 +41,14 @@ export class TransactionsController {
   async delete(@Param('id') id: number): Promise<void> {
     await this.transactionsService.deleteTransaction(id);
   }
+
+  @Post('transfer')
+  async transfer(@Body() transaction: Transaction): Promise<Transaction> {
+    return this.transactionsService.transferTransaction(transaction);
+  }
+
+  @Post('withdraw')
+  async withdraw(@Body() transaction: Transaction): Promise<Transaction> {
+    return this.transactionsService.withdrawTransaction(transaction);
+  }
 }
