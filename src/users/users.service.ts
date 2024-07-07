@@ -17,7 +17,17 @@ export class UsersService {
   async findOne(id: number): Promise<User> {
     const user = this.userRepository.findOne({
       where: { id },
-      relations: ['wallets'],
+      relations: [
+        'wallets',
+        'transactions',
+        'transactions.fromUser',
+        'transactions.toUser',
+        'receivedTransactions',
+        'receivedTransactions.fromUser',
+        'receivedTransactions.toUser',
+        'orders',
+        'marketListings',
+      ],
     });
     if (!user) {
       throw new NotFoundException('User does not exist!');

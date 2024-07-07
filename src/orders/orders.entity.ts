@@ -8,10 +8,11 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
-import { OrderStatus, OrderType } from './orders.enum';
+import { OrderStatus } from './orders.enum';
 import { User } from '../users/user.entity';
 import { Transaction } from '../transactions/transactions.entity';
 import { MarketListing } from '../market-listings/market-listings.entity';
+import { PaymentType } from '../common/enums/common.enum';
 
 @Entity()
 export class Order {
@@ -24,17 +25,17 @@ export class Order {
   @Column()
   marketListingId: number;
 
-  @Column()
-  orderId: number;
+  @Column({ enum: PaymentType })
+  type: PaymentType;
 
-  @Column()
-  type: OrderType;
+  @Column({ type: 'float8' })
+  amount: number;
 
-  @Column()
-  quantity: number;
+  @Column({ default: 0, nullable: true })
+  price?: number;
 
-  @Column()
-  price: number;
+  @Column({ nullable: true })
+  priceCurrency?: string;
 
   @Column({ enum: OrderStatus })
   status: OrderStatus;

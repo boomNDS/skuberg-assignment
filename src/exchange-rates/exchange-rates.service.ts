@@ -10,9 +10,9 @@ export class ExchangeRatesService {
     private exchangeRateRepo: Repository<ExchangeRate>,
   ) {}
 
-  async getCurrency(currency?: string): Promise<[ExchangeRate[], number]> {
-    return this.exchangeRateRepo.findAndCount({
-      where: { currency: currency ?? '' },
+  async getCurrency(currency?: string): Promise<ExchangeRate> {
+    return this.exchangeRateRepo.findOne({
+      where: { currency: currency || undefined },
     });
   }
 }

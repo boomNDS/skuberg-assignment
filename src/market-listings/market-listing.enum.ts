@@ -1,3 +1,3 @@
 export enum MarketPaymentMethod {
-  BANK = 'BANK',
+  BANK = 'bank',
 }

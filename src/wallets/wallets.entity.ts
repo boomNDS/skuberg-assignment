@@ -7,11 +7,15 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { User } from '../users/user.entity';
+import { WalletType } from './wallets.enum';
 
 @Entity()
 export class Wallet {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({ enum: WalletType, default: WalletType.CRYPTO })
+  type: WalletType;
 
   @Column()
   userId: number;
@@ -19,7 +23,7 @@ export class Wallet {
   @Column()
   currency: string;
 
-  @Column()
+  @Column({ type: 'float8' })
   balance: number;
 
   @CreateDateColumn()

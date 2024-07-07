@@ -14,8 +14,8 @@ export class ExchangeRate {
   @Column()
   currency: string;
 
-  @Column()
-  price: string;
+  @Column({ type: 'float8', default: 0 })
+  price: number;
 
   @CreateDateColumn()
   createdAt: Date;

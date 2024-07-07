@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Put,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { Order } from './orders.entity';
 
@@ -29,10 +21,10 @@ export class OrdersController {
     return this.ordersService.createOrder(order);
   }
 
-  @Put(':id')
-  async update(@Param('id') id: number, @Body() order: Order): Promise<any> {
-    return this.ordersService.updateOrder(id, order);
-  }
+  // @Put(':id')
+  // async update(@Param('id') id: number, @Body() order: Order): Promise<any> {
+  //   return this.ordersService.updateOrder(id, order);
+  // }
 
   @Delete(':id')
   async delete(@Param('id') id: number): Promise<void> {

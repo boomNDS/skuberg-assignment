@@ -12,6 +12,7 @@ Cryptocurrencies exchange service e.g https://c2c.binance.com/th/trade/buy/BTC
 - ระบบสามารถตั้ง ซื้อ-ขาย Cryptocurrencies (BTC,ETH,XRP, DOGE)
 - ระบบบันทึกการโอนเงินและซื้อ-ขายแลกเปลี่ยน
 - ระบบมีการสร้างบัญชีผู้ใช้
+- ระบบทั้งหมดใช้หน่วย USD ในการคำนวณ สามารถซื้อขายด้วยเงิน
 
 ## Cryptocurrencies exchange ER design
 
@@ -75,7 +76,7 @@ erDiagram
         string type "buy/sell"
         string paymentMethod "Bank"
         float amount
-        float sellPrice
+        float price
         datetime createdAt
         datetime updatedAt
     }
@@ -84,7 +85,7 @@ erDiagram
         int userId FK
         int marketListingId FK
         string type "buy/sell"
-        float quantity
+        float amount
         float price
         string status "pending/confirmed/canceled"
         datetime createdAt

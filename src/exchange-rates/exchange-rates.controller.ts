@@ -7,7 +7,7 @@ export class ExchangeRatesController {
   constructor(private readonly exchangeRatesService: ExchangeRatesService) {}
 
   @Get()
-  async getCurrency(): Promise<[ExchangeRate[], number]> {
+  async getCurrency(): Promise<ExchangeRate> {
     return this.exchangeRatesService.getCurrency();
   }
 }

@@ -6,10 +6,12 @@ import {
   CreateDateColumn,
   ManyToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { MarketPaymentMethod } from './market-listing.enum';
 import { User } from '../users/user.entity';
 import { Order } from '../orders/orders.entity';
+import { PaymentType } from '../common/enums/common.enum';
 
 @Entity()
 export class MarketListing {
@@ -19,17 +21,20 @@ export class MarketListing {
   @Column()
   currency: string;
 
-  @Column()
-  type: string;
+  @Column({ enum: PaymentType })
+  type: PaymentType;
 
   @Column({ enum: MarketPaymentMethod })
   paymentMethod: MarketPaymentMethod;
 
-  @Column()
+  @Column({ type: 'float8' })
   amount: number;
 
+  @Column({ nullable: true })
+  price?: number;
+
   @Column()
-  sellPrice: number;
+  userId: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -38,6 +43,7 @@ export class MarketListing {
   updatedAt: Date;
 
   @ManyToOne(() => User, (user) => user.marketListings)
+  @JoinColumn({ name: 'userId' })
   seller: User;
 
   @OneToMany(() => Order, (order) => order.marketListing)

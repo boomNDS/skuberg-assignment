@@ -29,21 +29,24 @@ export class Transaction {
   @Column({ enum: TransactionType })
   type: TransactionType;
 
-  @Column()
+  @Column({ type: 'float8' })
   amount: number;
 
-  @Column()
+  @Column({ type: 'float8' })
   price: number;
 
-  @Column()
+  @Column({ type: 'float8', nullable: true })
   fee: number;
 
-  @Column()
+  @Column({ type: 'float8', nullable: true })
   total: number;
 
-  // only for withdrawals
   @Column()
-  toAddress: number;
+  orderId: number;
+
+  // only for withdrawals
+  @Column({ nullable: true })
+  toAddress?: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -60,5 +63,6 @@ export class Transaction {
   toUser: User;
 
   @OneToOne(() => Order, (order) => order.transaction)
+  @JoinColumn({ name: 'orderId' })
   order: Order;
 }
