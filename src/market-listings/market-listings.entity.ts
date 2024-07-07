@@ -18,6 +18,9 @@ export class MarketListing {
   id: number;
 
   @Column()
+  userId: number;
+
+  @Column()
   currency: string;
 
   @Column({ enum: PaymentType })
@@ -25,9 +28,6 @@ export class MarketListing {
 
   @Column({ type: 'float8' })
   amount: number;
-
-  @Column()
-  userId: number;
 
   @CreateDateColumn()
   createdAt: Date;

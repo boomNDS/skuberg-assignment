@@ -26,7 +26,7 @@ erDiagram
     Order ||--o{ Transaction : has
 
     User {
-        int id PK
+        number id PK
         string email
         string password
         string username
@@ -40,53 +40,53 @@ erDiagram
         datetime updatedAt
     }
     ExchangeRate {
-        int id PK
+        number id PK
         string currency
         float price "price per unit in USD"
         datetime createdAt
         datetime updatedAt
     }
     Wallet {
-        int id PK
-        int userId FK
+        number id PK
+        string type "fiat/crypto"
+        number userId FK
         string currency
         float balance
         datetime createdAt
         datetime updatedAt
     }
     Transaction {
-        int id PK
-        int fromUserId FK
-        int toUserId FK
-        int orderId FK
+        number id PK
+        number fromUserId FK
+        number toUserId FK
         string currency
         string type "buy/sell/transfer/withdraw"
         float amount
         float price
         float fee
         float total
+        number orderId FK
         string toAddress "only for withdrawals"
         datetime createdAt
         datetime updatedAt
     }
     MarketListing {
-        int id PK
-        int sellerId FK "userId"
+        number id PK
+        number userId FK
         string currency
         string type "buy/sell"
-        string paymentMethod "Bank"
         float amount
-        float price
         datetime createdAt
         datetime updatedAt
     }
     Order {
-        int id PK
-        int userId FK
-        int marketListingId FK
+        number id PK
+        number userId FK
+        number marketListingId FK
         string type "buy/sell"
         float amount
         float price
+        string priceCurrency
         string status "pending/confirmed/canceled"
         datetime createdAt
         datetime updatedAt
