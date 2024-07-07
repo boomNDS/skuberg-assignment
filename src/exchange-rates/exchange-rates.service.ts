@@ -11,7 +11,6 @@ export class ExchangeRatesService {
   ) {}
 
   async getCurrency(currency?: string): Promise<ExchangeRate> {
-    console.log('currency : ', currency);
     return this.exchangeRateRepo.findOne({
       where: { currency: currency || undefined },
     });

@@ -97,7 +97,6 @@ export class WalletsService {
         currency,
       },
     });
-    console.log('withdraw : ', wallet);
     if (!wallet) {
       wallet = await this.walletRepo.save({
         userId,
@@ -122,9 +121,6 @@ export class WalletsService {
     toUserId: number,
     { currency, amount, type }: IWallet,
   ): Promise<void> {
-    console.log('fromUserId : ', fromUserId);
-    console.log('toUserId : ', toUserId);
-    console.log('wallet : ', { currency, amount });
     // withdraw from fromUser's wallet
     await this.withdraw({ currency, amount, userId: fromUserId, type });
 
@@ -136,18 +132,13 @@ export class WalletsService {
     currency: Partial<ExchangeRate>,
     order: Partial<Order>,
   ) {
-    // Get the exchange rate for THB
     const fiatTHBRate = await this.exchangeRatesService.getCurrency('THB');
-    // Calculate the sell price in USD
     const sellPriceInUsd = order.amount * (currency.price || 0);
-    console.log(`Need ${sellPriceInUsd} $ to buy`);
-    // Get the user's wallet details
     const [yourWallet] = await this.getMyWallet(
       order.userId,
       WalletType.FIAT,
       order.priceCurrency,
     );
-    // Filter and calculate balances
     const thbWallets = yourWallet.filter((w) => w.currency === 'THB');
     const usdWallets = yourWallet.filter((w) => w.currency === 'USD');
     const totalTHBBalance = thbWallets.reduce(
@@ -159,8 +150,6 @@ export class WalletsService {
       0,
     );
     const convertTHBToUSD = totalTHBBalance * fiatTHBRate.price;
-    console.log('Converted THB to USD:', convertTHBToUSD);
-    console.log('Total USD balance:', totalUSDBalance);
     return {
       convertTHBToUSD: convertTHBToUSD,
       totalUSDBalance,

@@ -12,7 +12,6 @@ import { MarketListing } from '../market-listings/market-listings.entity';
 import { WalletsService } from '../wallets/wallets.service';
 import { WalletType } from '../wallets/wallets.enum';
 import { PaymentType } from '../common/enums/common.enum';
-// import { OrderStatus } from './orders.enum';
 
 @Injectable()
 export class OrdersService {
@@ -25,10 +24,10 @@ export class OrdersService {
   ) {}
 
   async getOrders(): Promise<[Order[], number]> {
-    return this.orderRepo.findAndCount({ relations: [] });
+    return this.orderRepo.findAndCount({ relations: ['user'] });
   }
 
-  async getOrderById(id: number): Promise<any> {
+  async getOrderById(id: number): Promise<Order> {
     const order = await this.orderRepo.findOne({ where: { id } });
     if (!order) {
       throw new NotFoundException('Order does not exist!');
